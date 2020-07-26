@@ -14,7 +14,8 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
-            <Button x:Name="btnStart" Content="Start" Width="200" Height="35" Margin="20,0" Click="btnStart_Click"></Button>
+            <Button x:Name="btnStart" Content="Start Async" Width="200" Height="35" Margin="20,0" Click="btnStart_Click"></Button>
+            <Button x:Name="btnParallel" Content="Start Async Parallel" Width="200" Height="35" Margin="20,0" Click="btnParallel_Click"></Button>
             <Button x:Name="btnCancl" Content="Cancel" Width="200" Height="35" Margin="20,0" Click="btnCancl_Click"></Button>
         </StackPanel>
         <ProgressBar x:Name="pbDownload" Value="0" Height="30"  Grid.Row="1" />

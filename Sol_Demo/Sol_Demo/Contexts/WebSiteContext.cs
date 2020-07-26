@@ -49,6 +49,18 @@ namespace Sol_Demo.Contexts
             return webSiteModel;
         }
 
+        private WebSiteModel DownloadWebsite(string url)
+        {
+            WebClient webClient = new WebClient();
+            WebSiteModel webSiteModel = new WebSiteModel()
+            {
+                Url = url,
+                Data = webClient.DownloadString(url)
+            };
+
+            return webSiteModel;
+        }
+
         #endregion Private Method
 
         #region Public Method
@@ -82,6 +94,44 @@ namespace Sol_Demo.Contexts
                     //Report Data to Progress Object
                     progress.Report(progressReportModel);
                 }
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task RunDownloadParallelAsync(IProgress<ProgressReportModel> progress, ParallelOptions parallelOptions)
+        {
+            int counter = 0;
+            try
+            {
+                //Create an instance of ProgressReport Model where we can keep List Progress Report Data
+                var progressReportModel = new ProgressReportModel();
+
+                // get list of url Which we want to download the content
+                var listWebsiteUrl = await this.GetWebUrlListAsync();
+
+                await Task.Run(() =>
+                {
+                    Parallel.ForEach<String>(listWebsiteUrl, parallelOptions, (url) =>
+                    {
+                        // Download Web site Content
+                        var webSiteModel = this.DownloadWebsite(url);
+
+                        // Request for Cancellation Task
+                        parallelOptions.CancellationToken.ThrowIfCancellationRequested();
+
+                        counter++;
+
+                        // Store Data in Progress Model
+                        progressReportModel.PrecentageComplete = (counter * 100) / listWebsiteUrl.Count;
+                        progressReportModel.SiteDownloaded = webSiteModel;
+
+                        //Report Data to Progress Object
+                        progress.Report(progressReportModel);
+                    });
+                });
             }
             catch
             {

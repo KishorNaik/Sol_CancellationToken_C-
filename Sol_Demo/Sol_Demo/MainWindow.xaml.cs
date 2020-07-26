@@ -41,6 +41,8 @@ namespace Sol_Demo
         {
             try
             {
+                tbResult.Text = "";
+                pbDownload.Value = 0;
                 // Create an insatnce of Progress Oject
                 Progress<ProgressReportModel> progress = new Progress<ProgressReportModel>();
 
@@ -100,6 +102,45 @@ namespace Sol_Demo
         private void btnCancl_Click(object sender, RoutedEventArgs e)
         {
             cancellationTokenSource.Cancel();
+        }
+
+        private async void btnParallel_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                tbResult.Text = "";
+                pbDownload.Value = 0;
+
+                // Create an insatnce of Progress Oject
+                Progress<ProgressReportModel> progress = new Progress<ProgressReportModel>();
+                ParallelOptions parallelOptions = new ParallelOptions() { CancellationToken = cancellationTokenSource.Token };
+
+                // Wire up Progress Change Event
+                progress.ProgressChanged += Progress_ProgressChanged;
+
+                try
+                {
+                    // Start the Job for Download Website Content and Pass as parameter of progress and cancellation Token Object
+                    await websiteContext?.RunDownloadParallelAsync(progress, parallelOptions);
+                }
+                catch (Exception ex) when (ex is OperationCanceledException || ex is TaskCanceledException)
+                {
+                    tbResult.Text += $"The async download was cancelled. { Environment.NewLine }";
+                }
+                finally
+                {
+                    // if cancellation request true then dispose cancelllation Token
+                    if (cancellationTokenSource.IsCancellationRequested == true)
+                    {
+                        cancellationTokenSource.Dispose();
+                        cancellationTokenSource = new CancellationTokenSource();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
     }
 }
